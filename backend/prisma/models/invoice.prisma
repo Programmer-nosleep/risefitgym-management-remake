@@ -1,0 +1,21 @@
+model Invoice {
+    id          String @id @default(uuid())
+    orderId     String
+    userId      String
+    amount      Float
+    paymentMethod String
+    status      InvoiceStatus @default(PENDING)
+    transactionId String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    order       Order @relation(fields: [orderId], references: [id])
+    user        User @relation(fields: [userId], references: [id])
+}
+
+enum InvoiceStatus {
+    PENDING
+    PAID
+    FAILED
+    CANCELLED
+}

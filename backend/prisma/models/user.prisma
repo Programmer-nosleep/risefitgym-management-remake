@@ -1,0 +1,20 @@
+model User {
+    id          String @id @default(uuid())
+    name        String
+    email       String @unique
+    password    String
+    role        Role @default(USER)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    carts       Cart[]
+    orders      Order[]
+    invoices    Invoice[]
+    payments    Payment[]
+}
+
+enum Role {
+    USER
+    ADMIN
+    MEMBER
+}

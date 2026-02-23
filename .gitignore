@@ -1,0 +1,29 @@
+/.vscode
+/node_modules
+/coverage
+/.DS_Store
+
+# local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+**/*.trace
+**/*.zip
+**/*.tar.gz
+**/*.tgz
+**/*.log
+package-lock.json
+**/*.bun
+
+*.log
+*.lock
+*.json
+*.desktop
+*.exe
+*.bin
