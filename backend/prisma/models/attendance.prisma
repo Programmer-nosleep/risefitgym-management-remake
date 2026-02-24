@@ -1,5 +1,5 @@
 model Attendance {
-  id              String   @id @default(uuid())
+  id              String   @id @default(ulid())
   userId          String
   scannedByUserId String?
   checkInAt       DateTime @default(now())

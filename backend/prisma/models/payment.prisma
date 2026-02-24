@@ -1,5 +1,5 @@
 model Payment {
-  id            String          @id @default(uuid())
+  id            String          @id @default(ulid())
   orderId       String
   userId        String
   provider      PaymentProvider @default(MIDTRANS)

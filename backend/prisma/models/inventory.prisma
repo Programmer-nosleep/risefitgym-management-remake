@@ -1,5 +1,5 @@
 model InventoryMovement {
-  id        String                @id @default(uuid())
+  id        String                @id @default(ulid())
   productId String
   agentId   String?
   orderId   String?

@@ -1,5 +1,5 @@
 model Order {
-  id        String      @id @default(uuid())
+  id        String      @id @default(ulid())
   userId    String
   status    OrderStatus @default(PENDING)
   total     Int
@@ -16,7 +16,7 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
+  id        String   @id @default(ulid())
   orderId   String
   productId String
   quantity  Int

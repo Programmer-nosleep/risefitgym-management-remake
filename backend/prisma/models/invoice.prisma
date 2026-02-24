@@ -1,5 +1,5 @@
 model Invoice {
-    id          String @id @default(uuid())
+    id          String @id @default(ulid())
     orderId     String
     userId      String
     amount      Float
