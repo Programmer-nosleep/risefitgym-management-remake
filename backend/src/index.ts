@@ -4,6 +4,7 @@ import { errorMiddleware } from "./middleware/error.middleware";
 import { agentRoutes } from "./routes/agents";
 import { authRoutes } from "./routes/auth";
 import { cartRoutes } from "./routes/cart";
+import { invoiceRoutes } from "./routes/invoices";
 import { membershipRoutes } from "./routes/membership";
 import { orderRoutes } from "./routes/orders";
 import { paymentRoutes } from "./routes/payment";
@@ -22,6 +23,7 @@ const app = new Elysia()
   .use(cartRoutes)
   .use(attendanceRoutes)
   .use(orderRoutes)
+  .use(invoiceRoutes)
   .use(paymentRoutes)
   .listen(env.port);
 

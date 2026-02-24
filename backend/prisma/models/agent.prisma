@@ -1,5 +1,5 @@
 model Agent {
-  id        String   @id @default(uuid())
+  id        String   @id @default(ulid())
   name      String
   email     String?  @unique
   phone     String?

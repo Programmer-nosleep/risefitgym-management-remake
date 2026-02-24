@@ -1,5 +1,5 @@
 model Product {
-  id          String   @id @default(uuid())
+  id          String   @id @default(ulid())
   sku         String   @unique
   name        String
   description String?
