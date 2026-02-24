@@ -1,56 +1,40 @@
 import { Elysia, t } from "elysia";
-import Midtrans from "midtrans-client";
+import { prisma } from "../../prisma/schema";
+import { authMiddleware } from "../middleware/auth.middleware";
+import { midtransWebhookMiddleware } from "../middleware/webhook.middleware";
+import { createPaymentTokenController, midtransNotificationController } from "../modules/paymets/paymentes.controller";
 
 export const paymentRoutes = new Elysia({ prefix: "/payment" })
-    .derive(() => {
-        const snap = new Midtrans.Snap({
-            isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
-            serverKey: process.env.MIDTRANS_SERVER_KEY,
-            clientKey: process.env.MIDTRANS_CLIENT_KEY,
-        });
-        return { snap };
-    })
-    .post(
-        "/token",
-        async ({ body, snap }) => {
-            const { order_id, amount } = body;
+  .use(midtransWebhookMiddleware)
+  .post("/notification", midtransNotificationController)
+  .use(authMiddleware)
+  .post(
+    "/token",
+    async ({ authUser, body, set }) => {
+      if (!authUser) {
+        set.status = 401;
+        return { error: "Unauthorized" };
+      }
 
-            const parameter = {
-                transaction_details: {
-                    order_id: order_id,
-                    gross_amount: amount,
-                },
-                credit_card: {
-                    secure: true,
-                },
-            };
+      const order = await prisma.order.findUnique({
+        where: { id: body.orderId },
+        select: { id: true, userId: true },
+      });
 
-            try {
-                const transaction = await snap.createTransaction(parameter);
-                return {
-                    token: transaction.token,
-                    redirect_url: transaction.redirect_url,
-                };
-            } catch (error: any) {
-                return {
-                    status: "error",
-                    message: error.message,
-                };
-            }
-        },
-        {
-            body: t.Object({
-                order_id: t.String(),
-                amount: t.Number(),
-            }),
-        }
-    )
-    .post("/notification", async ({ body }) => {
-        // Handle Midtrans Webhook
-        console.log("Midtrans Notification Received:", body);
+      if (!order) {
+        set.status = 404;
+        return { error: "Order not found" };
+      }
 
-        // In a real app, you would verify the notification signature and update the DB
-        // const { order_id, transaction_status, fraud_status } = body;
+      const isPrivileged = authUser.role === "ADMIN" || authUser.role === "BACKOFFICE";
+      if (!isPrivileged && order.userId !== authUser.id) {
+        set.status = 403;
+        return { error: "Forbidden" };
+      }
 
-        return { status: "ok" };
-    });
+      return await createPaymentTokenController({ body, set });
+    },
+    {
+      body: t.Object({ orderId: t.String() }),
+    }
+  );
