@@ -1,22 +1,31 @@
 model Payment {
-    id          String @id @default(uuid())
-    orderId     String
-    userId      String
-    amount      Float
-    status      PaymentStatus @default(PENDING)
-    paymentMethod String
-    transactionId String
-    paymentUrl  String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id            String          @id @default(uuid())
+  orderId       String
+  userId        String
+  provider      PaymentProvider @default(MIDTRANS)
+  amount        Int
+  status        PaymentStatus   @default(PENDING)
+  transactionId String?
+  token         String?
+  redirectUrl   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
-    order       Order @relation(fields: [orderId], references: [id])
-    user        User @relation(fields: [userId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([transactionId])
+}
+
+enum PaymentProvider {
+  MIDTRANS
 }
 
 enum PaymentStatus {
-    PENDING
-    SUCCESS
-    FAILED
-    REFUNDED
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
 }

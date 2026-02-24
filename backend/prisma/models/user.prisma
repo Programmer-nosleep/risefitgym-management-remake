@@ -1,20 +1,24 @@
 model User {
-    id          String @id @default(uuid())
-    name        String
-    email       String @unique
-    password    String
-    role        Role @default(USER)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-    carts       Cart[]
-    orders      Order[]
-    invoices    Invoice[]
-    payments    Payment[]
+  cart        Cart?
+  orders      Order[]
+  memberships UserMembership[]
+  payments    Payment[]
+  invoices    Invoice[]
+
+  attendances        Attendance[] @relation("AttendanceUser")
+  attendancesScanned Attendance[] @relation("AttendanceScannedBy")
 }
 
 enum Role {
-    USER
-    ADMIN
-    MEMBER
+  USER
+  ADMIN
+  BACKOFFICE
 }

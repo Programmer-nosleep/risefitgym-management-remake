@@ -1,0 +1,19 @@
+model Attendance {
+  id              String   @id @default(uuid())
+  userId          String
+  scannedByUserId String?
+  checkInAt       DateTime @default(now())
+  checkOutAt      DateTime?
+  latitude        Float?
+  longitude       Float?
+  locationText    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user          User  @relation("AttendanceUser", fields: [userId], references: [id])
+  scannedByUser User? @relation("AttendanceScannedBy", fields: [scannedByUserId], references: [id])
+
+  @@index([userId])
+  @@index([scannedByUserId])
+  @@index([checkInAt])
+}

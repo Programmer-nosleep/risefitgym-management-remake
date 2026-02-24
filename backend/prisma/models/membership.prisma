@@ -1,25 +1,34 @@
 model Membership {
-    id          String @id @default(uuid())
-    name        String
-    description String
-    price       Float
-    duration    Int
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  price        Int
+  durationDays Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-    userMemberships UserMembership[]
+  userMemberships UserMembership[]
 }
 
 model UserMembership {
-    id          String @id @default(uuid())
-    userId      String
-    membershipId String
-    startDate   DateTime
-    endDate     DateTime
-    status      UserMembershipStatus @default(ACTIVE)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id           String               @id @default(uuid())
+  userId       String
+  membershipId String
+  startDate    DateTime
+  endDate      DateTime
+  status       UserMembershipStatus @default(ACTIVE)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
-    user        User @relation(fields: [userId], references: [id])
-    membership  Membership @relation(fields: [membershipId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  membership Membership @relation(fields: [membershipId], references: [id])
+
+  @@index([userId])
+  @@index([membershipId])
+}
+
+enum UserMembershipStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
 }
