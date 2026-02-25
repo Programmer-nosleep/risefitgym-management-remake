@@ -123,7 +123,7 @@ export default function LandingPage() {
             loading="eager"
             decoding="async"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/35 to-black/75" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/35 to-black/75" />
         </div>
 
         <header className="relative z-10">
@@ -298,7 +298,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  <div className="pointer-events-none absolute -bottom-8 left-0 right-0 hidden h-20 bg-gradient-to-b from-transparent to-zinc-950 lg:block" />
+                  <div className="pointer-events-none absolute -bottom-8 left-0 right-0 hidden h-20 bg-linear-to-b from-transparent to-zinc-950 lg:block" />
                 </div>
               </div>
             </div>
@@ -339,7 +339,7 @@ export default function LandingPage() {
                     loading="lazy"
                     decoding="async"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-tr from-black/15 via-transparent to-transparent" />
                 </div>
               ))}
             </div>

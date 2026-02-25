@@ -42,7 +42,7 @@ export default function Navbar() {
     .toUpperCase()
 
   return (
-    <nav className="bg-gradient-to-r from-orange-600 to-orange-800 shadow-md">
+    <nav className="bg-linear-to-r from-orange-600 to-orange-800 shadow-md">
       <div className="mx-auto flex h-16 max-w-screen-2xl items-center gap-3 px-4 md:px-6">
         <Sheet>
           <SheetTrigger asChild>

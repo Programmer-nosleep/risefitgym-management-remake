@@ -286,7 +286,7 @@ export default function Dashboard() {
 
       <Card className="gap-0 overflow-hidden py-0">
         <div className="relative px-6 py-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/15 via-primary/5 to-transparent" />
 
           <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-4">
@@ -409,8 +409,8 @@ export default function Dashboard() {
                       <span className="font-medium text-foreground">
                         {activeMembership
                           ? `${formatDateTime(new Date(activeMembership.startDate))} – ${formatDateTime(
-                              new Date(activeMembership.endDate)
-                            )}`
+                            new Date(activeMembership.endDate)
+                          )}`
                           : "—"}
                       </span>
                     </p>

@@ -1,10 +1,13 @@
 import AuthProvider from "@/pages/provider/AuthProvider"
+import ThemeProvider from "@/pages/provider/ThemeProvider"
 import AppRouter from "@/route/AppRouter"
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppRouter />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

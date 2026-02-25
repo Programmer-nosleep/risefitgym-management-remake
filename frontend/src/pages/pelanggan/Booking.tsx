@@ -221,7 +221,7 @@ export default function Booking() {
                   key={m.id}
                   className="gap-3 overflow-hidden py-0 shadow-none"
                 >
-                  <div className="relative h-20 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent">
+                  <div className="relative h-20 bg-linear-to-br from-primary/20 via-primary/10 to-transparent">
                     <div className="absolute right-3 top-3">
                       {isFeatured ? (
                         <Badge className="bg-primary text-primary-foreground">
