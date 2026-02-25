@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { env } from "./config/env";
 import { errorMiddleware } from "./middleware/error.middleware";
+import { corsMiddleware } from "./middleware/cors.middleware";
 import { agentRoutes } from "./routes/agents";
 import { authRoutes } from "./routes/auth";
 import { cartRoutes } from "./routes/cart";
@@ -11,11 +12,14 @@ import { paymentRoutes } from "./routes/payment";
 import { productRoutes } from "./routes/products";
 import { attendanceRoutes } from "./routes/attendance";
 import { userRoutes } from "./routes/users";
+import { profileRoutes } from "./routes/profile";
 
 const app = new Elysia()
+  .use(corsMiddleware)
   .use(errorMiddleware)
   .get("/", () => ({ ok: true, service: "risefit-backend" }))
   .use(authRoutes)
+  .use(profileRoutes)
   .use(membershipRoutes)
   .use(userRoutes)
   .use(productRoutes)
