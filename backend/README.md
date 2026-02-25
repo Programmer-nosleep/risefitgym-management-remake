@@ -28,10 +28,10 @@ bun run prisma:seed
 ```
 
 ## API
-Default base URL: `http://localhost:8000`
+Default base URL: `http://localhost:8000` (configurable via `PORT`)
 
 Routes:
-- `POST /auth/signup`, `POST /auth/signin`, `GET /auth/me`
+- `POST /auth/register` (`/auth/signup`), `POST /auth/login` (`/auth/signin`), `GET /auth/me`
 - `GET /products`, `POST /products` (admin/backoffice)
 - `GET /cart`, `POST /cart/items`
 - `POST /orders`, `POST /orders/from-cart`, `POST /orders/:id/checkout`

@@ -23,6 +23,8 @@ export async function signUpController({
   }
 }
 
+export const registerController = signUpController;
+
 export async function signInController({
   body,
   set,
@@ -42,3 +44,5 @@ export async function signInController({
     return { error: "Internal Server Error" };
   }
 }
+
+export const loginController = signInController;
