@@ -1,7 +1,9 @@
 import AppLayout from "@/layouts/AppLayout"
 import AdminPanel from "@/pages/admin/AdminPanel"
 import Login from "@/pages/auth/Login"
+import OAuthCallback from "@/pages/auth/OAuthCallback"
 import Register from "@/pages/auth/Register"
+import VerifyOtp from "@/pages/auth/VerifyOtp"
 import LandingPage from "@/pages/home/LandingPage"
 import Booking from "@/pages/pelanggan/Booking"
 import History from "@/pages/pelanggan/History"
@@ -57,7 +59,11 @@ export default function AppRouter() {
           }
         />
 
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
+
         <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<AppIndexRedirect />} />
             <Route path="profile" element={<Profile />} />

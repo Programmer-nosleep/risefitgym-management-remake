@@ -7,6 +7,15 @@ export type AuthSuccess = {
   accessToken: string
 }
 
+export type OtpPurpose = "LOGIN" | "REGISTER" | "VERIFY_EMAIL"
+
+export type OtpRequestResult = {
+  ok: true
+  purpose: OtpPurpose
+  email: string
+  expiresAt: string
+}
+
 export async function signIn(input: { email: string; password: string }) {
   try {
     const response = await api.post<AuthSuccess>("/auth/signin", input)
@@ -38,4 +47,14 @@ export async function signUp(input: { name: string; email: string; password: str
 export async function getMe() {
   const response = await api.get<{ user: AuthUser }>("/auth/me")
   return response.data.user
+}
+
+export async function requestOtp(input: { email: string; purpose: OtpPurpose; name?: string }) {
+  const response = await api.post<OtpRequestResult>("/auth/otp/request", input)
+  return response.data
+}
+
+export async function verifyOtp(input: { email: string; purpose: OtpPurpose; code: string }) {
+  const response = await api.post<AuthSuccess>("/auth/otp/verify", input)
+  return response.data
 }

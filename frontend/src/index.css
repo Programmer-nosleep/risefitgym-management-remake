@@ -108,20 +108,20 @@
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
+  --background: oklch(0.129 0 0);
+  --foreground: oklch(0.984 0 0);
+  --card: oklch(0.208 0 0);
+  --card-foreground: oklch(0.984 0 0);
+  --popover: oklch(0.208 0 0);
+  --popover-foreground: oklch(0.984 0 0);
   --primary: oklch(0.646 0.222 41.116);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
+  --primary-foreground: oklch(0.984 0 0);
+  --secondary: oklch(0.279 0 0);
+  --secondary-foreground: oklch(0.984 0 0);
+  --muted: oklch(0.279 0 0);
+  --muted-foreground: oklch(0.704 0 0);
+  --accent: oklch(0.279 0 0);
+  --accent-foreground: oklch(0.984 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -131,12 +131,12 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar: oklch(0.208 0 0);
+  --sidebar-foreground: oklch(0.984 0 0);
   --sidebar-primary: oklch(0.646 0.222 41.116);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary-foreground: oklch(0.984 0 0);
+  --sidebar-accent: oklch(0.279 0 0);
+  --sidebar-accent-foreground: oklch(0.984 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.646 0.222 41.116);
 }
@@ -145,13 +145,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
     @apply h-full;
   }
+
   body {
     @apply h-full bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
+
   #root {
     @apply h-full;
   }

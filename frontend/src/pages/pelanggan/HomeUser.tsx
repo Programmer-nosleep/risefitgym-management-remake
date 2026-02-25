@@ -254,7 +254,7 @@ export default function HomeUser() {
 
       <Card className="gap-0 overflow-hidden py-0">
         <div className="relative px-6 py-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-br from-primary/15 via-primary/5 to-transparent" />
 
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
