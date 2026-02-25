@@ -10,12 +10,37 @@ RiseFit Remake adalah sistem manajemen gym yang terdiri dari:
 
 ## 📁 Project Structure
 
-Repository ini diset sebagai **Bun workspace** (monorepo sederhana):
+This project is organized as a Bun monorepo:
 
-```
+```text
 risefit-remake/
-├── backend/                  # Elysia + Bun + Prisma (PostgreSQL)
-├── frontend/                 # React + Vite + shadcn/ui (Tailwind)
+├── backend/                  # Elysia API workspace
+│   ├── prisma/               # Prisma Database ORM
+│   │   ├── migrations/       # SQL migration history
+│   │   ├── models/           # Modular Prisma schemas
+│   │   └── schema.prisma     # Main Prisma schema file
+│   ├── src/                  # Backend application source code
+│   │   ├── config/           # Application configuration (Env, etc.)
+│   │   ├── middleware/       # Shared middleware (Auth, CORS)
+│   │   ├── modules/          # Business logic and controllers
+│   │   └── routes/           # REST API route definitions
+│   └── package.json          # Backend dependencies and scripts
+│
+├── frontend/                 # React + Vite frontend workspace
+│   ├── src/                  # Frontend application source code
+│   │   ├── assets/           # Static assets (images, icons)
+│   │   ├── components/       # Shared UI components (shadcn/ui)
+│   │   ├── helpers/          # Utility and helper functions
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── layouts/          # React component layouts
+│   │   ├── lib/              # Integrations and configs (axios, utils)
+│   │   ├── pages/            # Application page views
+│   │   ├── route/            # App routing configurations
+│   │   ├── services/         # API integration services
+│   │   └── store/            # Global state management using Zustand
+│   ├── vite.config.ts        # Vite configuration file
+│   └── package.json          # Frontend dependencies and scripts
+│
 ├── scripts/                  # Utility scripts / docs kecil
 ├── package.json              # Root workspace scripts (runner)
 └── .gitignore
