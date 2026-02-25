@@ -7,9 +7,11 @@ import {
   meController,
   setUserRoleController,
   updateMeController,
+  deleteUserController,
 } from "../modules/users/users.controller";
 
 export const userRoutes = new Elysia({ prefix: "/users" })
+  // triggering lint check
   .use(authMiddleware)
   .get("/me", meController)
   .patch(
@@ -36,5 +38,6 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         role: t.Union([t.Literal("USER"), t.Literal("ADMIN"), t.Literal("BACKOFFICE")]),
       }),
     }
-  );
+  )
+  .delete("/:id", deleteUserController, { params: t.Object({ id: t.String() }) });
 

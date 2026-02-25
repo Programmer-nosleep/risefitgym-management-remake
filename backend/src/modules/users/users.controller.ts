@@ -1,6 +1,6 @@
 import type { Context } from "elysia";
 import type { Role } from "@prisma/client";
-import { UsersError, getMe, getUserById, listUsers, setUserRole, updateMe } from "./users.service";
+import { UsersError, getMe, getUserById, listUsers, setUserRole, updateMe, deleteUser } from "./users.service";
 
 type ElysiaSet = Context["set"];
 
@@ -106,6 +106,26 @@ export async function setUserRoleController({
 }) {
   try {
     return await setUserRole(params.id, body.role);
+  } catch (error) {
+    if (error instanceof UsersError) {
+      set.status = statusForUsersError(error.code);
+      return { error: error.message };
+    }
+
+    set.status = 500;
+    return { error: "Internal Server Error" };
+  }
+}
+
+export async function deleteUserController({
+  params,
+  set,
+}: {
+  params: { id: string };
+  set: ElysiaSet;
+}) {
+  try {
+    return await deleteUser(params.id);
   } catch (error) {
     if (error instanceof UsersError) {
       set.status = statusForUsersError(error.code);

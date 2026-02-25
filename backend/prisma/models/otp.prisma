@@ -1,0 +1,22 @@
+model OtpToken {
+  id         String     @id @default(ulid())
+  email      String
+  purpose    OtpPurpose
+  codeHash   String
+  name       String?
+  expiresAt  DateTime
+  attempts   Int        @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([email, purpose])
+  @@index([expiresAt])
+}
+
+enum OtpPurpose {
+  LOGIN
+  REGISTER
+  VERIFY_EMAIL
+}
+

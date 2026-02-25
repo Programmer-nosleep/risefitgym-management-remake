@@ -18,6 +18,28 @@ export type AppEnv = {
   port: number;
   databaseUrl: string;
   jwtSecret: string;
+  webUrl: string;
+  otp: {
+    secret: string;
+    ttlMinutes: number;
+    resendCooldownSeconds: number;
+    maxAttempts: number;
+  };
+  smtp: {
+    host?: string;
+    port?: number;
+    user?: string;
+    pass?: string;
+    from?: string;
+    secure: boolean;
+  };
+  oauth: {
+    google: {
+      clientId?: string;
+      clientSecret?: string;
+      redirectUri?: string;
+    };
+  };
   midtrans: MidtransConfig;
   gym: GymConfig | null;
   seed: {
@@ -74,6 +96,39 @@ export function getEnv(): AppEnv {
   const databaseUrl = requireEnv("DATABASE_URL");
   const jwtSecret = requireEnv("JWT_SECRET");
 
+  const webUrl = readEnv("WEB_URL") ?? "http://localhost:5173";
+
+  const otp = {
+    secret: readEnv("OTP_SECRET") ?? jwtSecret,
+    ttlMinutes: parseNumberEnv("OTP_TTL_MINUTES", 10, { integer: true, min: 1, max: 120 }),
+    resendCooldownSeconds: parseNumberEnv("OTP_RESEND_COOLDOWN_SECONDS", 60, {
+      integer: true,
+      min: 1,
+      max: 3600,
+    }),
+    maxAttempts: parseNumberEnv("OTP_MAX_ATTEMPTS", 5, { integer: true, min: 1, max: 20 }),
+  };
+
+  const smtpPortRaw = readEnv("SMTP_PORT");
+  const smtpPort = smtpPortRaw ? Number(smtpPortRaw) : undefined;
+
+  const smtp = {
+    host: readEnv("SMTP_HOST"),
+    port: smtpPort && Number.isFinite(smtpPort) ? smtpPort : undefined,
+    user: readEnv("SMTP_USER"),
+    pass: readEnv("SMTP_PASS"),
+    from: readEnv("SMTP_FROM"),
+    secure: parseBooleanEnv("SMTP_SECURE", false),
+  };
+
+  const oauth = {
+    google: {
+      clientId: readEnv("GOOGLE_CLIENT_ID"),
+      clientSecret: readEnv("GOOGLE_CLIENT_SECRET"),
+      redirectUri: readEnv("GOOGLE_REDIRECT_URI"),
+    },
+  };
+
   const midtrans: MidtransConfig = {
     serverKey: readEnv("MIDTRANS_SERVER_KEY"),
     clientKey: readEnv("MIDTRANS_CLIENT_KEY"),
@@ -108,7 +163,7 @@ export function getEnv(): AppEnv {
     adminPassword: readEnv("SEED_ADMIN_PASSWORD"),
   };
 
-  cachedEnv = { port, databaseUrl, jwtSecret, midtrans, gym, seed };
+  cachedEnv = { port, databaseUrl, jwtSecret, webUrl, otp, smtp, oauth, midtrans, gym, seed };
   return cachedEnv;
 }
 

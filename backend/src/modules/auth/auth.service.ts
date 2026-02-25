@@ -1,6 +1,6 @@
 import type { Role } from "@prisma/client";
 import { prisma } from "../../../prisma/schema";
-import { hashPassword, verifyPassword } from "../../../utils/hash";
+import { hashPassword, shouldRehashPassword, verifyPassword } from "../../../utils/hash";
 import { signAccessToken } from "../../../utils/jwt";
 
 export type PublicUser = {
@@ -30,6 +30,7 @@ export async function registerUser(input: {
   name: string;
   email: string;
   password: string;
+  role?: Role;
 }): Promise<AuthSuccess> {
   const existing = await prisma.user.findUnique({
     where: { email: input.email },
@@ -45,7 +46,7 @@ export async function registerUser(input: {
       name: input.name,
       email: input.email,
       passwordHash: await hashPassword(input.password),
-      role: "USER",
+      role: input.role || "USER",
       cart: { create: {} },
     },
     select: { id: true, name: true, email: true, role: true },
@@ -64,13 +65,26 @@ export async function loginUser(input: {
     select: { id: true, name: true, email: true, role: true, passwordHash: true },
   });
 
-  if (!user) {
+  if (!user || !user.passwordHash) {
     throw new AuthError("INVALID_CREDENTIALS", "Invalid email or password");
   }
 
   const ok = await verifyPassword(input.password, user.passwordHash);
   if (!ok) {
     throw new AuthError("INVALID_CREDENTIALS", "Invalid email or password");
+  }
+
+  if (shouldRehashPassword(user.passwordHash)) {
+    try {
+      const nextHash = await hashPassword(input.password);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash: nextHash },
+        select: { id: true },
+      });
+    } catch (error) {
+      console.warn(`Failed to rehash password for user ${user.id}:`, error);
+    }
   }
 
   const accessToken = await signAccessToken({ userId: user.id, role: user.role });

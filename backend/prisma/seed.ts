@@ -1,4 +1,5 @@
 import { prisma } from "./schema";
+import { hashPassword } from "../utils/hash";
 
 await prisma.membership.createMany({
     data: [
@@ -20,7 +21,7 @@ await prisma.user.upsert({
     create: {
         name: "Admin",
         email: adminEmail,
-        passwordHash: await Bun.password.hash(adminPassword),
+        passwordHash: await hashPassword(adminPassword),
         role: "ADMIN",
     },
 });

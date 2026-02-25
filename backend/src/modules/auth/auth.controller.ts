@@ -7,7 +7,7 @@ export async function signUpController({
   body,
   set,
 }: {
-  body: { name: string; email: string; password: string };
+  body: { name: string; email: string; password: string; role?: "USER" | "ADMIN" | "BACKOFFICE" };
   set: ElysiaSet;
 }) {
   try {
@@ -22,6 +22,8 @@ export async function signUpController({
     return { error: "Internal Server Error" };
   }
 }
+
+export const registerController = signUpController;
 
 export async function signInController({
   body,
@@ -42,3 +44,5 @@ export async function signInController({
     return { error: "Internal Server Error" };
   }
 }
+
+export const loginController = signInController;
