@@ -1,0 +1,29 @@
+{
+  "name": "app",
+  "version": "1.0.50",
+  "scripts": {
+    "test": "bun test",
+    "dev": "bun run --watch src/index.ts",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate": "bunx prisma migrate dev",
+    "prisma:seed": "bun run prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.1",
+    "@types/midtrans-client": "^1.4.0",
+    "bcrypt": "^6.0.0",
+    "elysia": "latest",
+    "jose": "^6.1.0",
+    "midtrans-client": "^1.4.3",
+    "pg": "^8.18.0",
+    "prisma": "^7.4.1",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "bun-types": "latest",
+    "dotenv": "^17.3.1"
+  },
+  "module": "src/server.js"
+}
