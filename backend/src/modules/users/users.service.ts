@@ -61,10 +61,6 @@ export async function updateMe(
   let nextPasswordHash: string | undefined;
 
   if (hasPassword) {
-    if (!currentPassword) {
-      throw new UsersError("CURRENT_PASSWORD_REQUIRED", "Current password is required");
-    }
-
     const existing = await prisma.user.findUnique({
       where: { id: userId },
       select: { passwordHash: true },
@@ -72,8 +68,14 @@ export async function updateMe(
 
     if (!existing) throw new UsersError("USER_NOT_FOUND", "User not found");
 
-    const ok = await verifyPassword(currentPassword, existing.passwordHash);
-    if (!ok) throw new UsersError("INVALID_PASSWORD", "Current password is invalid");
+    if (existing.passwordHash) {
+      if (!currentPassword) {
+        throw new UsersError("CURRENT_PASSWORD_REQUIRED", "Current password is required");
+      }
+
+      const ok = await verifyPassword(currentPassword, existing.passwordHash);
+      if (!ok) throw new UsersError("INVALID_PASSWORD", "Current password is invalid");
+    }
 
     if (newPassword.length < 8) {
       throw new UsersError("INVALID_PASSWORD", "New password must be at least 8 characters");
@@ -149,4 +151,26 @@ export async function setUserRole(userId: string, role: Role): Promise<{ user: P
   });
 
   return { user };
+}
+
+export async function deleteUser(userId: string): Promise<{ user: PublicUser }> {
+  try {
+    const user = await prisma.user.delete({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    return { user };
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      throw new UsersError("USER_NOT_FOUND", "User not found");
+    }
+    throw error;
+  }
 }

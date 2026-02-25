@@ -7,7 +7,7 @@ export async function signUpController({
   body,
   set,
 }: {
-  body: { name: string; email: string; password: string };
+  body: { name: string; email: string; password: string; role?: "USER" | "ADMIN" | "BACKOFFICE" };
   set: ElysiaSet;
 }) {
   try {

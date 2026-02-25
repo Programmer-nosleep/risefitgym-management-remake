@@ -30,6 +30,7 @@ export async function registerUser(input: {
   name: string;
   email: string;
   password: string;
+  role?: Role;
 }): Promise<AuthSuccess> {
   const existing = await prisma.user.findUnique({
     where: { email: input.email },
@@ -45,7 +46,7 @@ export async function registerUser(input: {
       name: input.name,
       email: input.email,
       passwordHash: await hashPassword(input.password),
-      role: "USER",
+      role: input.role || "USER",
       cart: { create: {} },
     },
     select: { id: true, name: true, email: true, role: true },
@@ -64,7 +65,7 @@ export async function loginUser(input: {
     select: { id: true, name: true, email: true, role: true, passwordHash: true },
   });
 
-  if (!user) {
+  if (!user || !user.passwordHash) {
     throw new AuthError("INVALID_CREDENTIALS", "Invalid email or password");
   }
 
