@@ -1,6 +1,15 @@
 import type { Role } from "@/route/app-nav"
-import { get, patch, post } from "@/lib/http"
-import type { Attendance, AttendanceUser, MidtransTokenResponse, OrderStatus, Product, UserProfile } from "./user"
+import { del, get, patch, post } from "@/lib/http"
+import type {
+  Attendance,
+  AttendanceUser,
+  Invoice,
+  Membership,
+  MidtransTokenResponse,
+  OrderStatus,
+  Product,
+  UserProfile,
+} from "./user"
 
 type IsoDateString = string
 
@@ -20,7 +29,7 @@ export async function setUserRole(userId: string, role: Role) {
 }
 
 export async function createProduct(input: {
-  sku: string
+  sku?: string
   name: string
   description?: string
   price: number
@@ -43,6 +52,94 @@ export async function updateProduct(
 ) {
   const { product } = await patch<{ product: Product }, typeof input>(`/products/${productId}`, input)
   return product
+}
+
+export async function deleteProduct(productId: string) {
+  const { product } = await del<{ product: Product }>(`/products/${productId}`)
+  return product
+}
+
+export async function createMembership(input: {
+  name: string
+  description: string
+  price: number
+  durationDays: number
+}) {
+  const { membership } = await post<{ membership: Membership }, typeof input>("/memberships", input)
+  return membership
+}
+
+export async function updateMembership(
+  membershipId: string,
+  input: {
+    name?: string
+    description?: string
+    price?: number
+    durationDays?: number
+  }
+) {
+  const { membership } = await patch<{ membership: Membership }, typeof input>(
+    `/memberships/${membershipId}`,
+    input
+  )
+  return membership
+}
+
+export async function deleteMembership(membershipId: string) {
+  const { membership } = await del<{ membership: Membership }>(`/memberships/${membershipId}`)
+  return membership
+}
+
+export async function listInvoices() {
+  const { invoices, summary } = await get<{ invoices: Invoice[]; summary: { totalAmount: number } }>("/invoices")
+  return { invoices, totalAmount: summary.totalAmount }
+}
+
+export type FinanceTransaction = {
+  id: string
+  description: string
+  amount: number
+  occurredAt: IsoDateString
+  createdAt: IsoDateString
+  updatedAt: IsoDateString
+}
+
+export async function listFinanceTransactions() {
+  const { transactions, summary } = await get<{
+    transactions: FinanceTransaction[]
+    summary: { totalIncome: number }
+  }>("/admin-finance/transactions")
+  return { transactions, totalIncome: summary.totalIncome }
+}
+
+export async function createFinanceTransaction(input: {
+  description: string
+  amount: number
+  occurredAt: string
+}) {
+  const { transaction } = await post<{ transaction: FinanceTransaction }, typeof input>(
+    "/admin-finance/transactions",
+    input
+  )
+  return transaction
+}
+
+export async function updateFinanceTransaction(
+  transactionId: string,
+  input: { description?: string; amount?: number; occurredAt?: string }
+) {
+  const { transaction } = await patch<{ transaction: FinanceTransaction }, typeof input>(
+    `/admin-finance/transactions/${transactionId}`,
+    input
+  )
+  return transaction
+}
+
+export async function deleteFinanceTransaction(transactionId: string) {
+  const { transaction } = await del<{ transaction: FinanceTransaction }>(
+    `/admin-finance/transactions/${transactionId}`
+  )
+  return transaction
 }
 
 export async function stockInProduct(input: { productId: string; quantity: number; agentId?: string; note?: string }) {
@@ -92,6 +189,19 @@ export async function listAgents() {
 
 export async function createAgent(input: { name: string; email?: string; phone?: string }) {
   const { agent } = await post<{ agent: Agent }, typeof input>("/agents", input)
+  return agent
+}
+
+export async function updateAgent(
+  agentId: string,
+  input: { name?: string; email?: string; phone?: string }
+) {
+  const { agent } = await patch<{ agent: Agent }, typeof input>(`/agents/${agentId}`, input)
+  return agent
+}
+
+export async function deleteAgent(agentId: string) {
+  const { agent } = await del<{ agent: Agent }>(`/agents/${agentId}`)
   return agent
 }
 
