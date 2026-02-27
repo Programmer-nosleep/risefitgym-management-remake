@@ -76,6 +76,10 @@ export default function Login() {
     window.location.href = `${apiBaseUrl}/auth/oauth/google?next=${encodeURIComponent("/app")}`
   }
 
+  function handleApple() {
+    window.location.href = `${apiBaseUrl}/auth/oauth/apple?next=${encodeURIComponent("/app")}`
+  }
+
   function handleBack() {
     navigate("/", { replace: true })
   }
@@ -232,7 +236,12 @@ export default function Login() {
               Continue with Google
             </Button>
 
-            <Button variant="outline" className="h-11 w-full rounded-lg border-border bg-background text-foreground text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground" type="button">
+            <Button
+              variant="outline"
+              className="h-11 w-full rounded-lg border-border bg-background text-foreground text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+              type="button"
+              onClick={handleApple}
+            >
               <svg className="mr-2 size-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d={siApple.path} />
               </svg>
