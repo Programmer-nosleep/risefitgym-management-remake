@@ -13,6 +13,7 @@ import { productRoutes } from "./routes/products";
 import { attendanceRoutes } from "./routes/attendance";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profile";
+import { adminFinanceRoutes } from "./routes/adminFinance";
 
 const app = new Elysia()
   .use(corsMiddleware)
@@ -28,6 +29,7 @@ const app = new Elysia()
   .use(attendanceRoutes)
   .use(orderRoutes)
   .use(invoiceRoutes)
+  .use(adminFinanceRoutes)
   .use(paymentRoutes)
   .listen(env.port);
 

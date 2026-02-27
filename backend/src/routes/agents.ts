@@ -62,6 +62,100 @@ export const agentRoutes = new Elysia({ prefix: "/agents" })
       }),
     }
   )
+  .patch(
+    "/:id",
+    async ({ params, body, set }) => {
+      const name = typeof body.name === "string" ? body.name.trim() : undefined;
+      const emailRaw = typeof body.email === "string" ? body.email.trim() : undefined;
+      const phoneRaw = typeof body.phone === "string" ? body.phone.trim() : undefined;
+
+      const hasName = typeof name === "string" && name.length > 0;
+      const hasEmail = typeof emailRaw === "string";
+      const hasPhone = typeof phoneRaw === "string";
+
+      if (!hasName && !hasEmail && !hasPhone) {
+        set.status = 400;
+        return { error: "No changes to update" };
+      }
+
+      const email = hasEmail ? (emailRaw === "" ? null : emailRaw) : undefined;
+      const phone = hasPhone ? (phoneRaw === "" ? null : phoneRaw) : undefined;
+
+      try {
+        const agent = await prisma.agent.update({
+          where: { id: params.id },
+          data: {
+            ...(hasName ? { name } : {}),
+            ...(hasEmail ? { email } : {}),
+            ...(hasPhone ? { phone } : {}),
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+
+        return { agent };
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === "P2025") {
+            set.status = 404;
+            return { error: "Agent not found" };
+          }
+          if (error.code === "P2002") {
+            set.status = 409;
+            return { error: "Agent email already exists" };
+          }
+        }
+
+        set.status = 500;
+        return { error: "Internal Server Error" };
+      }
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1 })),
+        email: t.Optional(t.Union([t.String({ format: "email" }), t.Literal("")])),
+        phone: t.Optional(t.String()),
+      }),
+    }
+  )
+  .delete(
+    "/:id",
+    async ({ params, set }) => {
+      try {
+        const agent = await prisma.agent.delete({
+          where: { id: params.id },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+
+        return { agent };
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+          set.status = 404;
+          return { error: "Agent not found" };
+        }
+
+        set.status = 500;
+        return { error: "Internal Server Error" };
+      }
+    },
+    {
+      params: t.Object({ id: t.String() }),
+    }
+  )
   .get(
     "/:id/movements",
     async ({ params, set }) => {

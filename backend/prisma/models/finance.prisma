@@ -1,0 +1,11 @@
+model FinanceTransaction {
+  id          String   @id @default(ulid())
+  description String
+  amount      Int
+  occurredAt  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([occurredAt])
+}
+
