@@ -28,6 +28,81 @@ export async function listMemberships() {
   return { memberships };
 }
 
+export async function createMembership(input: {
+  name: string;
+  description: string;
+  price: number;
+  durationDays: number;
+}) {
+  const membership = await prisma.membership.create({
+    data: {
+      name: input.name,
+      description: input.description,
+      price: input.price,
+      durationDays: input.durationDays,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      durationDays: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { membership };
+}
+
+export async function updateMembership(
+  membershipId: string,
+  input: {
+    name?: string;
+    description?: string;
+    price?: number;
+    durationDays?: number;
+  }
+) {
+  const membership = await prisma.membership.update({
+    where: { id: membershipId },
+    data: {
+      name: input.name,
+      description: input.description,
+      price: input.price,
+      durationDays: input.durationDays,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      durationDays: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { membership };
+}
+
+export async function deleteMembership(membershipId: string) {
+  const membership = await prisma.membership.delete({
+    where: { id: membershipId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      durationDays: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return { membership };
+}
+
 export async function getMyActiveMembership(userId: string) {
   const now = new Date();
 

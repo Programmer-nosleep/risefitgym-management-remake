@@ -1,8 +1,29 @@
 import { Elysia, t } from "elysia";
 import { Prisma } from "@prisma/client";
+import { randomUUID } from "node:crypto";
 import { prisma } from "../../prisma/schema";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { requireRoles } from "../middleware/roles.middleware";
+
+const PG_INT_MAX = 2_147_483_647;
+
+function slugifySkuBase(input: string) {
+  return input
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-")
+    .toUpperCase();
+}
+
+function generateProductSku(name: string) {
+  const base = slugifySkuBase(name).slice(0, 16);
+  const suffix = randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
+
+  if (!base) return `RF-${suffix}`;
+  return `RF-${base}-${suffix}`;
+}
 
 export const productRoutes = new Elysia({ prefix: "/products" })
   .use(authMiddleware)
@@ -58,48 +79,75 @@ export const productRoutes = new Elysia({ prefix: "/products" })
   .post(
     "/",
     async ({ body, set }) => {
-      try {
-        const product = await prisma.product.create({
-          data: {
-            sku: body.sku,
-            name: body.name,
-            description: body.description,
-            price: body.price,
-            stock: body.stock ?? 0,
-            isActive: body.isActive ?? true,
-          },
-          select: {
-            id: true,
-            sku: true,
-            name: true,
-            description: true,
-            price: true,
-            stock: true,
-            isActive: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        });
+      const stock = body.stock ?? 0;
 
-        set.status = 201;
-        return { product };
-      } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-          set.status = 409;
-          return { error: "SKU already exists" };
-        }
-
-        set.status = 500;
-        return { error: "Internal Server Error" };
+      if (!Number.isSafeInteger(body.price) || body.price < 0 || body.price > PG_INT_MAX) {
+        set.status = 400;
+        return { error: `Harga maksimal adalah ${PG_INT_MAX}.` };
       }
+
+      if (!Number.isSafeInteger(stock) || stock < 0 || stock > PG_INT_MAX) {
+        set.status = 400;
+        return { error: `Stok maksimal adalah ${PG_INT_MAX}.` };
+      }
+
+      const requestedSku = body.sku?.trim() ?? "";
+      const isSkuProvided = requestedSku !== "";
+
+      let sku = isSkuProvided ? requestedSku : generateProductSku(body.name);
+
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        try {
+          const product = await prisma.product.create({
+            data: {
+              sku,
+              name: body.name,
+              description: body.description,
+              price: body.price,
+              stock,
+              isActive: body.isActive ?? true,
+            },
+            select: {
+              id: true,
+              sku: true,
+              name: true,
+              description: true,
+              price: true,
+              stock: true,
+              isActive: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          });
+
+          set.status = 201;
+          return { product };
+        } catch (error) {
+          if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            if (isSkuProvided) {
+              set.status = 409;
+              return { error: "SKU already exists" };
+            }
+
+            sku = generateProductSku(body.name);
+            continue;
+          }
+
+          set.status = 500;
+          return { error: "Internal Server Error" };
+        }
+      }
+
+      set.status = 500;
+      return { error: "Failed to generate unique SKU" };
     },
     {
       body: t.Object({
-        sku: t.String({ minLength: 1 }),
+        sku: t.Optional(t.String({ minLength: 1 })),
         name: t.String({ minLength: 1 }),
         description: t.Optional(t.String()),
-        price: t.Integer({ minimum: 0 }),
-        stock: t.Optional(t.Integer({ minimum: 0 })),
+        price: t.Integer({ minimum: 0, maximum: PG_INT_MAX }),
+        stock: t.Optional(t.Integer({ minimum: 0, maximum: PG_INT_MAX })),
         isActive: t.Optional(t.Boolean()),
       }),
     }
@@ -107,6 +155,14 @@ export const productRoutes = new Elysia({ prefix: "/products" })
   .patch(
     "/:id",
     async ({ params, body, set }) => {
+      if (
+        typeof body.price === "number" &&
+        (!Number.isSafeInteger(body.price) || body.price < 0 || body.price > PG_INT_MAX)
+      ) {
+        set.status = 400;
+        return { error: `Harga maksimal adalah ${PG_INT_MAX}.` };
+      }
+
       try {
         const product = await prisma.product.update({
           where: { id: params.id },
@@ -152,9 +208,44 @@ export const productRoutes = new Elysia({ prefix: "/products" })
         sku: t.Optional(t.String({ minLength: 1 })),
         name: t.Optional(t.String({ minLength: 1 })),
         description: t.Optional(t.String()),
-        price: t.Optional(t.Integer({ minimum: 0 })),
+        price: t.Optional(t.Integer({ minimum: 0, maximum: PG_INT_MAX })),
         isActive: t.Optional(t.Boolean()),
       }),
+    }
+  )
+  .delete(
+    "/:id",
+    async ({ params, set }) => {
+      try {
+        const product = await prisma.product.update({
+          where: { id: params.id },
+          data: { isActive: false },
+          select: {
+            id: true,
+            sku: true,
+            name: true,
+            description: true,
+            price: true,
+            stock: true,
+            isActive: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+
+        return { product };
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+          set.status = 404;
+          return { error: "Product not found" };
+        }
+
+        set.status = 500;
+        return { error: "Internal Server Error" };
+      }
+    },
+    {
+      params: t.Object({ id: t.String() }),
     }
   )
   .post(
@@ -165,6 +256,11 @@ export const productRoutes = new Elysia({ prefix: "/products" })
         return { error: "Quantity must be greater than 0" };
       }
 
+      if (!Number.isSafeInteger(body.quantity) || body.quantity > PG_INT_MAX) {
+        set.status = 400;
+        return { error: `Quantity maksimal adalah ${PG_INT_MAX}.` };
+      }
+
       try {
         const product = await prisma.$transaction(async (tx) => {
           if (body.agentId) {
@@ -173,14 +269,25 @@ export const productRoutes = new Elysia({ prefix: "/products" })
               select: { id: true },
             });
             if (!agent) {
-              set.status = 400;
-              return null;
+              return "AGENT_NOT_FOUND" as const;
             }
+          }
+
+          const existing = await tx.product.findUnique({
+            where: { id: params.id },
+            select: { stock: true },
+          });
+
+          if (!existing) return "PRODUCT_NOT_FOUND" as const;
+
+          const nextStock = existing.stock + body.quantity;
+          if (!Number.isSafeInteger(nextStock) || nextStock > PG_INT_MAX) {
+            return "STOCK_TOO_LARGE" as const;
           }
 
           const updated = await tx.product.update({
             where: { id: params.id },
-            data: { stock: { increment: body.quantity } },
+            data: { stock: nextStock },
             select: {
               id: true,
               sku: true,
@@ -205,18 +312,23 @@ export const productRoutes = new Elysia({ prefix: "/products" })
           return updated;
         });
 
-        if (product === null) {
-          if (set.status !== 400) set.status = 400;
+        if (product === "AGENT_NOT_FOUND") {
+          set.status = 400;
           return { error: "Agent not found" };
         }
 
-        return { product };
-      } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        if (product === "PRODUCT_NOT_FOUND") {
           set.status = 404;
           return { error: "Product not found" };
         }
 
+        if (product === "STOCK_TOO_LARGE") {
+          set.status = 400;
+          return { error: `Stok maksimal adalah ${PG_INT_MAX}.` };
+        }
+
+        return { product };
+      } catch (error) {
         set.status = 500;
         return { error: "Internal Server Error" };
       }
@@ -224,7 +336,7 @@ export const productRoutes = new Elysia({ prefix: "/products" })
     {
       params: t.Object({ id: t.String() }),
       body: t.Object({
-        quantity: t.Integer({ minimum: 1 }),
+        quantity: t.Integer({ minimum: 1, maximum: PG_INT_MAX }),
         agentId: t.Optional(t.String()),
         note: t.Optional(t.String()),
       }),
@@ -237,6 +349,11 @@ export const productRoutes = new Elysia({ prefix: "/products" })
       if (!Number.isFinite(quantityDelta) || quantityDelta === 0) {
         set.status = 400;
         return { error: "quantityDelta must be a non-zero number" };
+      }
+
+      if (!Number.isSafeInteger(quantityDelta) || quantityDelta < -PG_INT_MAX || quantityDelta > PG_INT_MAX) {
+        set.status = 400;
+        return { error: `quantityDelta harus diantara -${PG_INT_MAX} sampai ${PG_INT_MAX}.` };
       }
 
       try {
@@ -252,6 +369,11 @@ export const productRoutes = new Elysia({ prefix: "/products" })
           if (nextStock < 0) {
             set.status = 400;
             return "NEGATIVE_STOCK" as const;
+          }
+
+          if (!Number.isSafeInteger(nextStock) || nextStock > PG_INT_MAX) {
+            set.status = 400;
+            return "STOCK_TOO_LARGE" as const;
           }
 
           const updated = await tx.product.update({
@@ -289,6 +411,10 @@ export const productRoutes = new Elysia({ prefix: "/products" })
           return { error: "Stock cannot go below 0" };
         }
 
+        if (product === "STOCK_TOO_LARGE") {
+          return { error: `Stok maksimal adalah ${PG_INT_MAX}.` };
+        }
+
         return { product };
       } catch {
         set.status = 500;
@@ -298,7 +424,7 @@ export const productRoutes = new Elysia({ prefix: "/products" })
     {
       params: t.Object({ id: t.String() }),
       body: t.Object({
-        quantityDelta: t.Integer(),
+        quantityDelta: t.Integer({ minimum: -PG_INT_MAX, maximum: PG_INT_MAX }),
         note: t.Optional(t.String()),
       }),
     }
