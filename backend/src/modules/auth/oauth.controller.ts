@@ -10,17 +10,6 @@ import {
 
 type ElysiaSet = Context["set"];
 
-function statusForOAuthError(code: string) {
-  switch (code) {
-    case "OAUTH_NOT_CONFIGURED":
-      return 500;
-    case "OAUTH_STATE_INVALID":
-      return 400;
-    default:
-      return 400;
-  }
-}
-
 function getOauthCookieOptions() {
   return {
     secure: env.cookieSecure,
@@ -106,13 +95,12 @@ export async function googleOauthStartController({
 
     return redirect(url.toString());
   } catch (error) {
+    readAndClearOauthNextCookie(cookie);
     if (error instanceof OAuthError) {
-      set.status = statusForOAuthError(error.code);
-      return { error: error.message, code: error.code };
+      return redirectToFrontend({ set, error: error.code });
     }
 
-    set.status = 500;
-    return { error: "Internal Server Error" };
+    return redirectToFrontend({ set, error: "unknown" });
   }
 }
 
@@ -184,13 +172,12 @@ export async function appleOauthStartController({
     url.searchParams.set("response_mode", "query");
     return redirect(url.toString());
   } catch (error) {
+    readAndClearOauthNextCookie(cookie);
     if (error instanceof OAuthError) {
-      set.status = statusForOAuthError(error.code);
-      return { error: error.message, code: error.code };
+      return redirectToFrontend({ set, error: error.code });
     }
 
-    set.status = 500;
-    return { error: "Internal Server Error" };
+    return redirectToFrontend({ set, error: "unknown" });
   }
 }
 
