@@ -1,6 +1,12 @@
 import Dotenv from "dotenv";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-Dotenv.config();
+// Load backend/.env regardless of current working directory (monorepo-friendly).
+const backendEnvPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..", ".env");
+if (fs.existsSync(backendEnvPath)) Dotenv.config({ path: backendEnvPath });
+else Dotenv.config();
 
 export type GymConfig = {
   lat: number;
