@@ -6,7 +6,13 @@ import {
   signInController,
   signUpController,
 } from "../modules/auth/auth.controller";
-import { googleOauthCallbackController, googleOauthStartController } from "../modules/auth/oauth.controller";
+import {
+  appleOauthCallbackController,
+  appleOauthStartController,
+  googleOauthCallbackController,
+  googleOauthStartController,
+} from "../modules/auth/oauth.controller";
+import { oauth2Plugin } from "../modules/auth/oauth2.plugin";
 import { otpRequestController, otpVerifyController } from "../modules/auth/otp.controller";
 import {
   otpRequestBodySchema,
@@ -17,6 +23,7 @@ import {
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(authMiddleware)
+  .use(oauth2Plugin)
   .post("/register", registerController, {
     body: signUpBodySchema,
   })
@@ -39,6 +46,16 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     query: t.Object({ next: t.Optional(t.String()) }),
   })
   .get("/oauth/google/callback", googleOauthCallbackController, {
+    query: t.Object({
+      code: t.Optional(t.String()),
+      state: t.Optional(t.String()),
+      error: t.Optional(t.String()),
+    }),
+  })
+  .get("/oauth/apple", appleOauthStartController, {
+    query: t.Object({ next: t.Optional(t.String()) }),
+  })
+  .get("/oauth/apple/callback", appleOauthCallbackController, {
     query: t.Object({
       code: t.Optional(t.String()),
       state: t.Optional(t.String()),

@@ -19,6 +19,7 @@ export type AppEnv = {
   databaseUrl: string;
   jwtSecret: string;
   webUrl: string;
+  cookieSecure: boolean;
   otp: {
     secret: string;
     ttlMinutes: number;
@@ -37,6 +38,16 @@ export type AppEnv = {
     google: {
       clientId?: string;
       clientSecret?: string;
+      redirectUri?: string;
+    };
+    apple: {
+      clientId?: string;
+      teamId?: string;
+      keyId?: string;
+      /**
+       * PKCS#8 private key in PEM (-----BEGIN PRIVATE KEY-----) or base64-encoded DER.
+       */
+      privateKey?: string;
       redirectUri?: string;
     };
   };
@@ -97,6 +108,7 @@ export function getEnv(): AppEnv {
   const jwtSecret = requireEnv("JWT_SECRET");
 
   const webUrl = readEnv("WEB_URL") ?? "http://localhost:5173";
+  const cookieSecure = parseBooleanEnv("COOKIE_SECURE", false);
 
   const otp = {
     secret: readEnv("OTP_SECRET") ?? jwtSecret,
@@ -126,6 +138,13 @@ export function getEnv(): AppEnv {
       clientId: readEnv("GOOGLE_CLIENT_ID"),
       clientSecret: readEnv("GOOGLE_CLIENT_SECRET"),
       redirectUri: readEnv("GOOGLE_REDIRECT_URI"),
+    },
+    apple: {
+      clientId: readEnv("APPLE_CLIENT_ID"),
+      teamId: readEnv("APPLE_TEAM_ID"),
+      keyId: readEnv("APPLE_KEY_ID"),
+      privateKey: readEnv("APPLE_PRIVATE_KEY") ?? readEnv("APPLE_PRIVATE_KEY_BASE64"),
+      redirectUri: readEnv("APPLE_REDIRECT_URI"),
     },
   };
 
@@ -163,7 +182,7 @@ export function getEnv(): AppEnv {
     adminPassword: readEnv("SEED_ADMIN_PASSWORD"),
   };
 
-  cachedEnv = { port, databaseUrl, jwtSecret, webUrl, otp, smtp, oauth, midtrans, gym, seed };
+  cachedEnv = { port, databaseUrl, jwtSecret, webUrl, cookieSecure, otp, smtp, oauth, midtrans, gym, seed };
   return cachedEnv;
 }
 
