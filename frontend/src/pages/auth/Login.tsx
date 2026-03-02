@@ -29,6 +29,9 @@ export default function Login() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Temporarily disable Apple OAuth button (keep handler + UI for later).
+  const isAppleOauthEnabled = false
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -236,17 +239,19 @@ export default function Login() {
               Continue with Google
             </Button>
 
-            <Button
-              variant="outline"
-              className="h-11 w-full rounded-lg border-border bg-background text-foreground text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
-              type="button"
-              onClick={handleApple}
-            >
-              <svg className="mr-2 size-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d={siApple.path} />
-              </svg>
-              Continue with Apple
-            </Button>
+            {isAppleOauthEnabled && (
+              <Button
+                variant="outline"
+                className="h-11 w-full rounded-lg border-border bg-background text-foreground text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+                type="button"
+                onClick={handleApple}
+              >
+                <svg className="mr-2 size-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d={siApple.path} />
+                </svg>
+                Continue with Apple
+              </Button>
+            )}
           </div>
 
           <p className="mt-8 text-center text-xs text-muted-foreground font-medium">
